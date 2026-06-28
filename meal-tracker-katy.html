@@ -1072,7 +1072,7 @@ function logSavedMeal(id){
 function renderPantry(){
   const q=(document.getElementById('pantrySearch').value||'').toLowerCase();
   const d=getData();
-  const all=[...BASE_PANTRY, ...d.customFoods];
+  const all=[...BASE_PANTRY, ...d.customFoods].sort((a,b)=>a.name.localeCompare(b.name));
   const filtered=all.filter(i=>!q||i.name.toLowerCase().includes(q));
   const list=document.getElementById('pantryList');
   list.innerHTML='';
