@@ -1115,12 +1115,10 @@ async function readLabelWithAI(base64, mimeType){
     showPhotoStatus('Sending to AI...','var(--accent)');
     var response, data;
     try{
-      response=await fetch('https://api.anthropic.com/v1/messages',{
+      response=await fetch('https://nutrition-proxy.wicke27.workers.dev',{
         method:'POST',
         headers:{
           'Content-Type':'application/json',
-          'anthropic-version':'2023-06-01',
-          'anthropic-dangerous-direct-browser-access':'true'
         },
         body:JSON.stringify({
           model:'claude-sonnet-4-6',
