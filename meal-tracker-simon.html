@@ -214,7 +214,10 @@ input:focus,select:focus{border-color:var(--accent);}
 <!-- PANTRY TAB -->
 <div id="tab-pantry" class="tab-content">
   <div class="hdr"><h1>Pantry</h1><div class="date">Per 100g unless noted</div></div>
-  <input type="text" id="pantrySearch" placeholder="🔍 Search pantry..." oninput="renderPantry()" style="margin:12px 12px 6px;width:calc(100% - 24px);">
+  <div style="display:flex;align-items:center;gap:8px;margin:12px 12px 6px;">
+    <input type="text" id="pantrySearch" placeholder="🔍 Search pantry..." oninput="renderPantry()" style="flex:1;margin:0;">
+    <button onclick="loadCloudPantry()" style="background:var(--accent);color:#000;font-weight:700;font-size:12px;border:none;border-radius:8px;padding:10px 12px;cursor:pointer;white-space:nowrap;">⟳ Sync</button>
+  </div>
   <div id="pantryList"></div>
   <div style="padding:12px;">
     <button class="btn-secondary" onclick="openAddPantryModal()">+ Add Custom Food</button>
@@ -658,24 +661,34 @@ function saveData(d){ localStorage.setItem(STOR, JSON.stringify(d)); }
 async function loadCloudPantry(){
   try{
     const r=await fetch(WORKER+'/pantry');
+    if(!r.ok){ console.log('Pantry fetch failed:',r.status); return; }
     const data=await r.json();
     const d=getData();
-    d.customFoods=data.customFoods||[];
+    // Replace customFoods deduped by id
+    const cloud=data.customFoods||[];
+    d.customFoods=cloud;
     d.customMeals=data.customMeals||[];
     saveData(d);
     renderPantry();
     if(typeof renderMeals==='function') renderMeals();
+    console.log('Cloud pantry loaded:',cloud.length,'foods');
   }catch(e){ console.log('Cloud pantry load failed',e); }
 }
 
 async function saveCloudPantry(){
   try{
     const d=getData();
-    await fetch(WORKER+'/pantry',{
+    // Dedupe by id before saving
+    const seen=new Set();
+    d.customFoods=d.customFoods.filter(f=>{ if(seen.has(f.id)) return false; seen.add(f.id); return true; });
+    saveData(d);
+    const r=await fetch(WORKER+'/pantry',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({customFoods:d.customFoods, customMeals:d.customMeals})
     });
+    if(!r.ok){ console.log('Pantry save failed:',r.status); return; }
+    console.log('Cloud pantry saved:',d.customFoods.length,'foods');
   }catch(e){ console.log('Cloud pantry save failed',e); }
 }
 // ─────────────────────────────────────────────────────────────
