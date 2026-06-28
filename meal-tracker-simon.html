@@ -1125,9 +1125,9 @@ function renderSavedMeals(){
     const isFav=d.favouriteMeals.includes(meal.id);
     const card=document.createElement('div');
     card.className='saved-meal-card';
-    const favBtn='<button onclick="toggleFavourite(''+meal.id+'')" style="background:none;border:none;font-size:18px;cursor:pointer;padding:0;">'+(isFav?'\u2b50':'\u2606')+'</button>';
-    const editBtn='<button onclick="openEditMeal(''+meal.id+'')" style="background:var(--card);color:var(--text);font-size:12px;font-weight:600;border:1px solid var(--border);border-radius:8px;padding:7px 12px;cursor:pointer;">\u270f\ufe0f Edit</button>';
-    const logBtn='<button class="log-meal-btn" style="flex:1" onclick="logSavedMeal(''+meal.id+'')">Log to Today</button>';
+    const favBtn='<button onclick="toggleFavourite(\'' + meal.id + '\')" style="background:none;border:none;font-size:18px;cursor:pointer;padding:0;">' + (isFav ? '⭐' : '☆') + '</button>';
+    const editBtn='<button onclick="openEditMeal(\'' + meal.id + '\')" style="background:var(--card);color:var(--text);font-size:12px;font-weight:600;border:1px solid var(--border);border-radius:8px;padding:7px 12px;cursor:pointer;">✏️ Edit</button>';
+    const logBtn='<button class="log-meal-btn" style="flex:1" onclick="logSavedMeal(\'' + meal.id + '\')">Log to Today</button>';
     card.innerHTML=
       '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">'+
         '<span style="font-size:11px;font-weight:700;color:var(--accent);background:var(--border);border-radius:6px;padding:2px 8px;">'+num+' &middot; '+meal.cat+'</span>'+
