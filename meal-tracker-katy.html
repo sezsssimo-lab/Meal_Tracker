@@ -645,12 +645,39 @@ const NEW_MEALS = {
 const ALL_NEW_MEALS = [...NEW_MEALS.Breakfast, ...NEW_MEALS.Lunch, ...NEW_MEALS.Dinner, ...NEW_MEALS.Snack];
 
 // ── STATE ──
+const WORKER='https://nutrition-proxy.wicke27.workers.dev';
+
 function getData(){
   const raw = localStorage.getItem(STOR);
   if(raw) return JSON.parse(raw);
   return {log:{}, customFoods:[], customMeals:[], lastDate:''};
 }
 function saveData(d){ localStorage.setItem(STOR, JSON.stringify(d)); }
+
+// CLOUD PANTRY SYNC
+async function loadCloudPantry(){
+  try{
+    const r=await fetch(WORKER+'/pantry');
+    const data=await r.json();
+    const d=getData();
+    d.customFoods=data.customFoods||[];
+    d.customMeals=data.customMeals||[];
+    saveData(d);
+    renderPantry();
+    if(typeof renderMeals==='function') renderMeals();
+  }catch(e){ console.log('Cloud pantry load failed',e); }
+}
+
+async function saveCloudPantry(){
+  try{
+    const d=getData();
+    await fetch(WORKER+'/pantry',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({customFoods:d.customFoods, customMeals:d.customMeals})
+    });
+  }catch(e){ console.log('Cloud pantry save failed',e); }
+}
 
 function getTodayKey(){
   const d=new Date(); return d.toISOString().slice(0,10);
@@ -1066,6 +1093,7 @@ function addCustomFood(){
   const d=getData();
   d.customFoods.push({id:'cf'+Date.now(),name,p,c,f,k,unit:'g'});
   saveData(d);
+  saveCloudPantry();
   closeModal('addPantryModal');
   renderPantry();
   alert('✓ "'+name+'" added to pantry');
@@ -1276,6 +1304,7 @@ function saveParsedFood(){
   var d=getData();
   d.customFoods.push({id:'cf'+Date.now(),name:name,p:p,c:c,f:f,k:k,unit:'g'});
   saveData(d);
+  saveCloudPantry();
   renderPantry();
   resetPhotoTab();
   alert('"'+name+'" saved to Pantry!');
@@ -1293,6 +1322,7 @@ function addManualFood(){
   var d=getData();
   d.customFoods.push({id:'cf'+Date.now(),name:name,p:p,c:c,f:f,k:k,unit:'g'});
   saveData(d);
+  saveCloudPantry();
   document.getElementById('manualFoodName').value='';
   document.getElementById('manualEntryP').value='';
   document.getElementById('manualEntryC').value='';
@@ -1458,6 +1488,7 @@ loadTargets();
 renderLog();
 renderPantry();
 renderWeightChart();
+loadCloudPantry();
 </script>
 </body>
 </html>
