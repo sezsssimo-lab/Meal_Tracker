@@ -206,8 +206,16 @@ input:focus,select:focus{border-color:var(--accent);}
     <button class="filter-chip" onclick="filterMeals('Dinner',this)">Dinner</button>
     <button class="filter-chip" onclick="filterMeals('Snack',this)">Snack</button>
     <button class="filter-chip" onclick="filterMeals('Custom',this)">My Meals</button>
+    <button class="filter-chip" onclick="filterMeals('Favourites',this)">⭐ Favourites</button>
   </div>
-  <input type="text" id="mealSearch" placeholder="🔍 Search meals..." oninput="renderSavedMeals()" style="margin:0 12px 10px;width:calc(100% - 24px);">
+  <div style="display:flex;gap:8px;margin:0 12px 10px;align-items:center;">
+    <input type="text" id="mealSearch" placeholder="🔍 Search meals..." oninput="renderSavedMeals()" style="flex:1;margin:0;">
+    <select id="mealSort" onchange="renderSavedMeals()" style="background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:8px;font-size:12px;">
+      <option value="id">ID</option>
+      <option value="name">A-Z</option>
+      <option value="latest">Latest</option>
+    </select>
+  </div>
   <div id="savedMealsList"></div>
 </div>
 
@@ -493,6 +501,30 @@ input:focus,select:focus{border-color:var(--accent);}
 </div>
 
 <!-- ADD PANTRY MODAL -->
+<div class="modal-overlay" id="editMealModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('editMealModal')">×</button>
+    <h2>Edit & Save As New Meal</h2>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">Editing creates a new meal with the next available number. Original is kept.</div>
+    <input type="text" id="editMealName" placeholder="Meal name">
+    <select id="editMealCat" style="margin-top:8px;">
+      <option value="Breakfast">Breakfast</option>
+      <option value="Lunch">Lunch</option>
+      <option value="Dinner">Dinner</option>
+      <option value="Snack">Snack</option>
+    </select>
+    <textarea id="editMealDesc" placeholder="Ingredients / description" style="margin-top:8px;height:80px;resize:none;"></textarea>
+    <label style="font-size:11px;color:var(--muted);margin-top:8px;display:block;">Macros:</label>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px;">
+      <div><label style="font-size:11px;color:var(--blue);">Protein (g)</label><input type="number" id="editMealP" placeholder="0"></div>
+      <div><label style="font-size:11px;color:var(--yellow);">Carbs (g)</label><input type="number" id="editMealC" placeholder="0"></div>
+      <div><label style="font-size:11px;color:var(--red);">Fats (g)</label><input type="number" id="editMealF" placeholder="0"></div>
+      <div><label style="font-size:11px;color:var(--muted);">Calories</label><input type="number" id="editMealK" placeholder="0"></div>
+    </div>
+    <button class="btn-primary" onclick="saveEditedMeal()" style="margin-top:12px;">💾 Save As New Meal</button>
+  </div>
+</div>
+
 <div class="modal-overlay" id="addPantryModal">
   <div class="modal">
     <button class="modal-close" onclick="closeModal('addPantryModal')">×</button>
@@ -596,52 +628,52 @@ const BASE_PANTRY = [
 // ── NEW MEALS ──
 const NEW_MEALS = {
   Breakfast: [
-    {id:'nm1', name:'Mango & Coconut Overnight Weetbix', p:38, f:9, c:58, k:473, desc:'3x Weetbix, 150ml coconut milk (light), 150g YoPRO vanilla, 20g WPI, 80g fresh mango, 10g honey', cat:'Breakfast'},
-    {id:'nm2', name:'Strawberry & Cream Overnight Weetbix', p:40, f:10, c:52, k:458, desc:'3x Weetbix, 150ml skim milk, 150g YoPRO strawberry, 20g WPI, 80g strawberries, 15g light cream cheese', cat:'Breakfast'},
-    {id:'nm3', name:'Peanut Butter & Banana Overnight Weetbix', p:42, f:14, c:60, k:538, desc:'3x Weetbix, 150ml soy milk, 150g YoPRO vanilla, 20g WPI, 100g banana, 15g natural peanut butter', cat:'Breakfast'},
-    {id:'nm4', name:'Raspberry White Choc Overnight Weetbix', p:38, f:9, c:54, k:461, desc:'3x Weetbix, 150ml soy milk, 150g YoPRO vanilla, 20g WPI, 60g raspberries, 10g white choc chips', cat:'Breakfast'},
-    {id:'nm5', name:'Lemon Curd Overnight Weetbix', p:37, f:8, c:56, k:452, desc:'2x Weetbix, 100ml soy milk, 150g YoPRO lemon, 20g WPI, 25g light cream cheese, 20g lemon curd', cat:'Breakfast'},
-    {id:'nm6', name:'Choc Hazelnut Protein Oats', p:40, f:12, c:55, k:492, desc:'80g rolled oats, 250ml skim milk, 20g WPI choc, 15g Nutella, 150g YoPRO, 10g crushed hazelnuts', cat:'Breakfast'},
-    {id:'nm7', name:'Egg White Scramble & Toast', p:38, f:9, c:32, k:369, desc:'200g egg whites, 2 whole eggs, 2 slices sourdough, 30g shaved ham, 50g spinach, 50g mushrooms', cat:'Breakfast'},
-    {id:'nm8', name:'Smashed Avo Bagel', p:28, f:12, c:48, k:420, desc:"1x Abe's bagel, 80g avocado, 2 poached eggs, 50g cherry tomatoes, 30g feta light", cat:'Breakfast'},
-    {id:'nm9', name:'Greek Yoghurt Protein Bowl', p:42, f:6, c:44, k:402, desc:'250g Chobani plain 0%, 25g WPI vanilla, 60g granola (low sugar), 100g mixed berries, 15g honey', cat:'Breakfast'},
-    {id:'nm10', name:'Protein Pancakes', p:44, f:8, c:40, k:408, desc:'1 banana (mashed), 3 egg whites, 1 whole egg, 30g WPI, 40g oat flour, 100ml almond milk', cat:'Breakfast'},
+    {id:'B-0001', name:'Mango & Coconut Overnight Weetbix', p:38, f:9, c:58, k:473, desc:'3x Weetbix, 150ml coconut milk (light), 150g YoPRO vanilla, 20g WPI, 80g fresh mango, 10g honey', cat:'Breakfast'},
+    {id:'B-0002', name:'Strawberry & Cream Overnight Weetbix', p:40, f:10, c:52, k:458, desc:'3x Weetbix, 150ml skim milk, 150g YoPRO strawberry, 20g WPI, 80g strawberries, 15g light cream cheese', cat:'Breakfast'},
+    {id:'B-0003', name:'Peanut Butter & Banana Overnight Weetbix', p:42, f:14, c:60, k:538, desc:'3x Weetbix, 150ml soy milk, 150g YoPRO vanilla, 20g WPI, 100g banana, 15g natural peanut butter', cat:'Breakfast'},
+    {id:'B-0004', name:'Raspberry White Choc Overnight Weetbix', p:38, f:9, c:54, k:461, desc:'3x Weetbix, 150ml soy milk, 150g YoPRO vanilla, 20g WPI, 60g raspberries, 10g white choc chips', cat:'Breakfast'},
+    {id:'B-0005', name:'Lemon Curd Overnight Weetbix', p:37, f:8, c:56, k:452, desc:'2x Weetbix, 100ml soy milk, 150g YoPRO lemon, 20g WPI, 25g light cream cheese, 20g lemon curd', cat:'Breakfast'},
+    {id:'B-0006', name:'Choc Hazelnut Protein Oats', p:40, f:12, c:55, k:492, desc:'80g rolled oats, 250ml skim milk, 20g WPI choc, 15g Nutella, 150g YoPRO, 10g crushed hazelnuts', cat:'Breakfast'},
+    {id:'B-0007', name:'Egg White Scramble & Toast', p:38, f:9, c:32, k:369, desc:'200g egg whites, 2 whole eggs, 2 slices sourdough, 30g shaved ham, 50g spinach, 50g mushrooms', cat:'Breakfast'},
+    {id:'B-0008', name:'Smashed Avo Bagel', p:28, f:12, c:48, k:420, desc:"1x Abe's bagel, 80g avocado, 2 poached eggs, 50g cherry tomatoes, 30g feta light", cat:'Breakfast'},
+    {id:'B-0009', name:'Greek Yoghurt Protein Bowl', p:42, f:6, c:44, k:402, desc:'250g Chobani plain 0%, 25g WPI vanilla, 60g granola (low sugar), 100g mixed berries, 15g honey', cat:'Breakfast'},
+    {id:'B-0010', name:'Protein Pancakes', p:44, f:8, c:40, k:408, desc:'1 banana (mashed), 3 egg whites, 1 whole egg, 30g WPI, 40g oat flour, 100ml almond milk', cat:'Breakfast'},
   ],
   Lunch: [
-    {id:'nm11', name:'Chicken & Avocado Salad Bowl', p:52, f:18, c:22, k:462, desc:'180g chicken breast (cooked), 70g avocado, 80g mixed leaves, 60g cucumber, 60g cherry tomatoes', cat:'Lunch'},
-    {id:'nm12', name:'Tuna & Brown Rice Bowl', p:48, f:8, c:52, k:472, desc:'150g tuna in spring water, 160g cooked brown rice, 80g edamame, 50g cucumber, 30g carrot', cat:'Lunch'},
-    {id:'nm13', name:'Turkey & Cranberry Wrap', p:45, f:12, c:42, k:456, desc:'120g shaved turkey breast, 1 Mission Lite wrap, 30g light cream cheese, 20g cranberry sauce, 40g baby spinach', cat:'Lunch'},
-    {id:'nm14', name:'Prawn & Mango Salad', p:38, f:10, c:28, k:354, desc:'180g cooked prawns, 80g mango, 80g mixed salad leaves, 60g cucumber, 20g red onion', cat:'Lunch'},
-    {id:'nm15', name:'Chicken Souvlaki Wrap', p:50, f:11, c:40, k:459, desc:'160g chicken breast, 1 Mission Lite wrap, 40g tzatziki, 50g tomato, 40g cucumber, 30g lettuce', cat:'Lunch'},
-    {id:'nm16', name:'Salmon & Quinoa Bowl', p:46, f:16, c:38, k:476, desc:'150g salmon fillet, 120g cooked quinoa, 50g baby spinach, 30g cucumber, 20g feta light', cat:'Lunch'},
-    {id:'nm17', name:'Steak & Sweet Potato Bowl', p:52, f:14, c:48, k:534, desc:'180g eye fillet, 200g sweet potato (roasted), 100g broccoli, 50g mushrooms', cat:'Lunch'},
-    {id:'nm18', name:'Chicken & Rice Paper Rolls', p:40, f:6, c:36, k:358, desc:'150g chicken breast (shredded), 6 rice paper sheets, 50g vermicelli, 40g carrot, 40g cucumber', cat:'Lunch'},
-    {id:'nm19', name:'Lean Beef & Veggie Stir Fry with Rice', p:52, f:10, c:55, k:526, desc:'180g lean beef strips, 180g stir fry veg, 160g cooked jasmine rice, soy sauce, sesame oil', cat:'Lunch'},
-    {id:'nm20', name:'Chicken Pesto & Sundried Tomato Wrap', p:48, f:14, c:36, k:466, desc:"160g chicken breast, 1 Mission Lite wrap, 20g Leggo's pesto, 40g sundried tomatoes, 30g rocket", cat:'Lunch'},
+    {id:'L-0001', name:'Chicken & Avocado Salad Bowl', p:52, f:18, c:22, k:462, desc:'180g chicken breast (cooked), 70g avocado, 80g mixed leaves, 60g cucumber, 60g cherry tomatoes', cat:'Lunch'},
+    {id:'L-0002', name:'Tuna & Brown Rice Bowl', p:48, f:8, c:52, k:472, desc:'150g tuna in spring water, 160g cooked brown rice, 80g edamame, 50g cucumber, 30g carrot', cat:'Lunch'},
+    {id:'L-0003', name:'Turkey & Cranberry Wrap', p:45, f:12, c:42, k:456, desc:'120g shaved turkey breast, 1 Mission Lite wrap, 30g light cream cheese, 20g cranberry sauce, 40g baby spinach', cat:'Lunch'},
+    {id:'L-0004', name:'Prawn & Mango Salad', p:38, f:10, c:28, k:354, desc:'180g cooked prawns, 80g mango, 80g mixed salad leaves, 60g cucumber, 20g red onion', cat:'Lunch'},
+    {id:'L-0005', name:'Chicken Souvlaki Wrap', p:50, f:11, c:40, k:459, desc:'160g chicken breast, 1 Mission Lite wrap, 40g tzatziki, 50g tomato, 40g cucumber, 30g lettuce', cat:'Lunch'},
+    {id:'L-0006', name:'Salmon & Quinoa Bowl', p:46, f:16, c:38, k:476, desc:'150g salmon fillet, 120g cooked quinoa, 50g baby spinach, 30g cucumber, 20g feta light', cat:'Lunch'},
+    {id:'L-0007', name:'Steak & Sweet Potato Bowl', p:52, f:14, c:48, k:534, desc:'180g eye fillet, 200g sweet potato (roasted), 100g broccoli, 50g mushrooms', cat:'Lunch'},
+    {id:'L-0008', name:'Chicken & Rice Paper Rolls', p:40, f:6, c:36, k:358, desc:'150g chicken breast (shredded), 6 rice paper sheets, 50g vermicelli, 40g carrot, 40g cucumber', cat:'Lunch'},
+    {id:'L-0009', name:'Lean Beef & Veggie Stir Fry with Rice', p:52, f:10, c:55, k:526, desc:'180g lean beef strips, 180g stir fry veg, 160g cooked jasmine rice, soy sauce, sesame oil', cat:'Lunch'},
+    {id:'L-0010', name:'Chicken Pesto & Sundried Tomato Wrap', p:48, f:14, c:36, k:466, desc:"160g chicken breast, 1 Mission Lite wrap, 20g Leggo's pesto, 40g sundried tomatoes, 30g rocket", cat:'Lunch'},
   ],
   Dinner: [
-    {id:'nm21', name:'Cajun Salmon with Sweet Potato Mash', p:48, f:18, c:42, k:530, desc:'200g salmon fillet, 250g sweet potato, 100g broccolini, cajun seasoning, 30ml light cream', cat:'Dinner'},
-    {id:'nm22', name:'Chicken & Mushroom Risotto', p:50, f:12, c:58, k:548, desc:'180g chicken breast, 80g arborio rice (raw), 100g mushrooms, 500ml chicken stock, 30g parmesan', cat:'Dinner'},
-    {id:'nm23', name:'Prawn Pad Thai', p:46, f:10, c:60, k:526, desc:'200g prawns, 80g rice noodles (raw), 2 eggs, 50g bean sprouts, 20ml fish sauce, 20g peanuts', cat:'Dinner'},
-    {id:'nm24', name:'Lean Beef Tacos', p:50, f:16, c:44, k:526, desc:'180g lean beef mince, 4 corn tortillas, 30g Bega light shredded, 50g salsa, Greek yoghurt', cat:'Dinner'},
-    {id:'nm25', name:'Thai Green Chicken Curry', p:48, f:14, c:40, k:478, desc:'180g chicken breast, 100ml light coconut milk, 15g green curry paste, 160g cooked jasmine rice', cat:'Dinner'},
-    {id:'nm26', name:'Chicken Marsala with Potato & Veg', p:52, f:12, c:42, k:492, desc:'200g chicken breast, 200g baby potatoes, 100g asparagus, 80g mushrooms, 60ml marsala wine', cat:'Dinner'},
-    {id:'nm27', name:'Beef & Broccoli Bowl', p:52, f:12, c:44, k:492, desc:'180g lean beef strips, 160g cooked brown rice, 150g broccoli, oyster sauce, soy sauce', cat:'Dinner'},
-    {id:'nm28', name:'Baked Lemon Herb Chicken & Veg', p:54, f:10, c:32, k:434, desc:'220g chicken breast, 150g pumpkin, 100g green beans, 80g cherry tomatoes, lemon, rosemary', cat:'Dinner'},
-    {id:'nm29', name:'Chicken Tikka Masala with Rice', p:50, f:14, c:48, k:522, desc:"180g chicken breast, 100g Pataks tikka masala sauce, 30ml light cream, 160g cooked basmati", cat:'Dinner'},
-    {id:'nm30', name:'Honey Garlic Salmon & Veg', p:48, f:16, c:36, k:476, desc:'200g salmon fillet, 160g cooked brown rice, 100g broccolini, honey, soy sauce, garlic', cat:'Dinner'},
+    {id:'D-0001', name:'Cajun Salmon with Sweet Potato Mash', p:48, f:18, c:42, k:530, desc:'200g salmon fillet, 250g sweet potato, 100g broccolini, cajun seasoning, 30ml light cream', cat:'Dinner'},
+    {id:'D-0002', name:'Chicken & Mushroom Risotto', p:50, f:12, c:58, k:548, desc:'180g chicken breast, 80g arborio rice (raw), 100g mushrooms, 500ml chicken stock, 30g parmesan', cat:'Dinner'},
+    {id:'D-0003', name:'Prawn Pad Thai', p:46, f:10, c:60, k:526, desc:'200g prawns, 80g rice noodles (raw), 2 eggs, 50g bean sprouts, 20ml fish sauce, 20g peanuts', cat:'Dinner'},
+    {id:'D-0004', name:'Lean Beef Tacos', p:50, f:16, c:44, k:526, desc:'180g lean beef mince, 4 corn tortillas, 30g Bega light shredded, 50g salsa, Greek yoghurt', cat:'Dinner'},
+    {id:'D-0005', name:'Thai Green Chicken Curry', p:48, f:14, c:40, k:478, desc:'180g chicken breast, 100ml light coconut milk, 15g green curry paste, 160g cooked jasmine rice', cat:'Dinner'},
+    {id:'D-0006', name:'Chicken Marsala with Potato & Veg', p:52, f:12, c:42, k:492, desc:'200g chicken breast, 200g baby potatoes, 100g asparagus, 80g mushrooms, 60ml marsala wine', cat:'Dinner'},
+    {id:'D-0007', name:'Beef & Broccoli Bowl', p:52, f:12, c:44, k:492, desc:'180g lean beef strips, 160g cooked brown rice, 150g broccoli, oyster sauce, soy sauce', cat:'Dinner'},
+    {id:'D-0008', name:'Baked Lemon Herb Chicken & Veg', p:54, f:10, c:32, k:434, desc:'220g chicken breast, 150g pumpkin, 100g green beans, 80g cherry tomatoes, lemon, rosemary', cat:'Dinner'},
+    {id:'D-0009', name:'Chicken Tikka Masala with Rice', p:50, f:14, c:48, k:522, desc:"180g chicken breast, 100g Pataks tikka masala sauce, 30ml light cream, 160g cooked basmati", cat:'Dinner'},
+    {id:'D-0010', name:'Honey Garlic Salmon & Veg', p:48, f:16, c:36, k:476, desc:'200g salmon fillet, 160g cooked brown rice, 100g broccolini, honey, soy sauce, garlic', cat:'Dinner'},
   ],
   Snack: [
-    {id:'nm31', name:'YoPRO + Fruit & Nuts', p:22, f:8, c:28, k:276, desc:'150g YoPRO any flavour, 100g mixed berries, 15g almonds', cat:'Snack'},
-    {id:'nm32', name:'Rice Cakes with Avocado & Egg', p:16, f:10, c:22, k:242, desc:'4x Sunrice rice cakes, 60g avocado, 1 hard boiled egg, salt, pepper, chilli flakes', cat:'Snack'},
-    {id:'nm33', name:'Protein Smoothie', p:30, f:6, c:32, k:302, desc:'30g WPI vanilla, 200ml almond milk, 100g banana, 80g frozen berries, 10g honey', cat:'Snack'},
-    {id:'nm34', name:'Corn Thins with Tuna & Avocado', p:22, f:9, c:20, k:253, desc:'4x Real Foods Corn Thins, 95g tuna in spring water, 50g avocado, lemon juice', cat:'Snack'},
-    {id:'nm35', name:'Apple & Natural Peanut Butter', p:8, f:12, c:32, k:268, desc:'1 medium apple (180g), 25g natural peanut butter', cat:'Snack'},
-    {id:'nm36', name:'Greek Yoghurt & Granola', p:20, f:7, c:30, k:263, desc:'200g Chobani plain 0%, 30g low sugar granola, 80g strawberries, 5g honey', cat:'Snack'},
-    {id:'nm37', name:'Boiled Eggs & Veggies', p:18, f:10, c:8, k:194, desc:'2 hard boiled eggs, 100g carrot sticks, 100g celery, 30g hummus', cat:'Snack'},
-    {id:'nm38', name:'Cheese, Crackers & Fruit', p:16, f:10, c:28, k:266, desc:'40g Bega light cheese, 4x Salada crackers, 100g grapes or apple', cat:'Snack'},
-    {id:'nm39', name:'Cottage Cheese Bowl', p:22, f:4, c:12, k:172, desc:'200g Bulla cottage cheese (light), 80g pineapple, 10g honey, 5g cinnamon', cat:'Snack'},
-    {id:'nm40', name:'Banana & Almond Protein Rice Cakes', p:18, f:8, c:36, k:292, desc:'4x Sunrice rice cakes, 100g banana (sliced), 20g almond butter, 5g honey', cat:'Snack'},
+    {id:'S-0001', name:'YoPRO + Fruit & Nuts', p:22, f:8, c:28, k:276, desc:'150g YoPRO any flavour, 100g mixed berries, 15g almonds', cat:'Snack'},
+    {id:'S-0002', name:'Rice Cakes with Avocado & Egg', p:16, f:10, c:22, k:242, desc:'4x Sunrice rice cakes, 60g avocado, 1 hard boiled egg, salt, pepper, chilli flakes', cat:'Snack'},
+    {id:'S-0003', name:'Protein Smoothie', p:30, f:6, c:32, k:302, desc:'30g WPI vanilla, 200ml almond milk, 100g banana, 80g frozen berries, 10g honey', cat:'Snack'},
+    {id:'S-0004', name:'Corn Thins with Tuna & Avocado', p:22, f:9, c:20, k:253, desc:'4x Real Foods Corn Thins, 95g tuna in spring water, 50g avocado, lemon juice', cat:'Snack'},
+    {id:'S-0005', name:'Apple & Natural Peanut Butter', p:8, f:12, c:32, k:268, desc:'1 medium apple (180g), 25g natural peanut butter', cat:'Snack'},
+    {id:'S-0006', name:'Greek Yoghurt & Granola', p:20, f:7, c:30, k:263, desc:'200g Chobani plain 0%, 30g low sugar granola, 80g strawberries, 5g honey', cat:'Snack'},
+    {id:'S-0007', name:'Boiled Eggs & Veggies', p:18, f:10, c:8, k:194, desc:'2 hard boiled eggs, 100g carrot sticks, 100g celery, 30g hummus', cat:'Snack'},
+    {id:'S-0008', name:'Cheese, Crackers & Fruit', p:16, f:10, c:28, k:266, desc:'40g Bega light cheese, 4x Salada crackers, 100g grapes or apple', cat:'Snack'},
+    {id:'S-0009', name:'Cottage Cheese Bowl', p:22, f:4, c:12, k:172, desc:'200g Bulla cottage cheese (light), 80g pineapple, 10g honey, 5g cinnamon', cat:'Snack'},
+    {id:'S-0010', name:'Banana & Almond Protein Rice Cakes', p:18, f:8, c:36, k:292, desc:'4x Sunrice rice cakes, 100g banana (sliced), 20g almond butter, 5g honey', cat:'Snack'},
   ]
 };
 
@@ -1033,25 +1065,79 @@ function filterMeals(cat,btn){
   renderSavedMeals();
 }
 
+// MEAL HELPERS
+function getMealPrefix(cat){
+  if(cat==='Breakfast') return 'B';
+  if(cat==='Lunch') return 'L';
+  if(cat==='Dinner') return 'D';
+  if(cat==='Snack') return 'S';
+  return 'C';
+}
+
+function getMealNumber(meal){
+  if(meal.id && /^[BLDSC]-[0-9]{4}$/.test(meal.id)) return meal.id;
+  return getMealPrefix(meal.cat||'Custom')+'-????';
+}
+
+function getNextMealId(cat){
+  const d=getData();
+  const prefix=getMealPrefix(cat)+'-';
+  const allIds=[...ALL_NEW_MEALS,...d.customMeals]
+    .filter(m=>m.id && m.id.startsWith(prefix))
+    .map(m=>parseInt(m.id.split('-')[1])||0);
+  const next=allIds.length>0?Math.max(...allIds)+1:1;
+  return prefix+String(next).padStart(4,'0');
+}
+
+function toggleFavourite(id){
+  const d=getData();
+  if(!d.favouriteMeals) d.favouriteMeals=[];
+  const idx=d.favouriteMeals.indexOf(id);
+  if(idx>=0) d.favouriteMeals.splice(idx,1);
+  else d.favouriteMeals.push(id);
+  saveData(d);
+  renderSavedMeals();
+}
+
 function renderSavedMeals(){
   const q=(document.getElementById('mealSearch').value||'').toLowerCase();
+  const sortEl=document.getElementById('mealSort');
+  const sortBy=sortEl?sortEl.value:'id';
   const d=getData();
-  const all=[...ALL_NEW_MEALS, ...d.customMeals.map(m=>({...m,cat:'Custom'}))];
-  const filtered=all.filter(m=>{
+  if(!d.favouriteMeals) d.favouriteMeals=[];
+  const all=[...ALL_NEW_MEALS, ...d.customMeals];
+  let filtered=all.filter(m=>{
+    if(activeMealFilter==='Favourites') return d.favouriteMeals.includes(m.id);
     const catOk=activeMealFilter==='all'||(activeMealFilter==='Custom'?m.cat==='Custom':m.cat===activeMealFilter);
-    const qOk=!q||m.name.toLowerCase().includes(q);
+    const qOk=!q||m.name.toLowerCase().includes(q)||getMealNumber(m).toLowerCase().includes(q);
     return catOk&&qOk;
   });
+  if(sortBy==='name') filtered.sort((a,b)=>a.name.localeCompare(b.name));
+  else if(sortBy==='latest') filtered=filtered.reverse();
   const list=document.getElementById('savedMealsList');
   list.innerHTML='';
   if(!filtered.length){list.innerHTML='<div style="text-align:center;color:var(--muted);padding:30px;font-size:13px;">No meals found</div>';return;}
   filtered.forEach(meal=>{
+    const num=getMealNumber(meal);
+    const isFav=d.favouriteMeals.includes(meal.id);
     const card=document.createElement('div');
     card.className='saved-meal-card';
-    card.innerHTML='<div class="sm-category">'+meal.cat+'</div><div class="sm-name">'+meal.name+'</div><div class="sm-desc">'+meal.desc+'</div><div class="sm-macros"><span>Protein: </span><strong>'+meal.p+'g</strong> · <span>Carbs: </span><strong>'+meal.c+'g</strong> · <span>Fats: </span><strong>'+meal.f+'g</strong> · <span>Kcal: </span><strong>'+meal.k+'</strong></div><button class="log-meal-btn" onclick="logSavedMeal(\''+meal.id+'\')">Log to Today</button>';
+    const favBtn='<button onclick="toggleFavourite(''+meal.id+'')" style="background:none;border:none;font-size:18px;cursor:pointer;padding:0;">'+(isFav?'\u2b50':'\u2606')+'</button>';
+    const editBtn='<button onclick="openEditMeal(''+meal.id+'')" style="background:var(--card);color:var(--text);font-size:12px;font-weight:600;border:1px solid var(--border);border-radius:8px;padding:7px 12px;cursor:pointer;">\u270f\ufe0f Edit</button>';
+    const logBtn='<button class="log-meal-btn" style="flex:1" onclick="logSavedMeal(''+meal.id+'')">Log to Today</button>';
+    card.innerHTML=
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">'+
+        '<span style="font-size:11px;font-weight:700;color:var(--accent);background:var(--border);border-radius:6px;padding:2px 8px;">'+num+' &middot; '+meal.cat+'</span>'+
+        favBtn+
+      '</div>'+
+      '<div class="sm-name">'+meal.name+'</div>'+
+      '<div class="sm-desc">'+(meal.desc||'')+'</div>'+
+      '<div class="sm-macros">Protein: <strong>'+meal.p+'g</strong> &middot; Carbs: <strong>'+meal.c+'g</strong> &middot; Fats: <strong>'+meal.f+'g</strong> &middot; <strong>'+meal.k+' kcal</strong></div>'+
+      '<div style="display:flex;gap:8px;margin-top:8px;">'+logBtn+editBtn+'</div>';
     list.appendChild(card);
   });
 }
+
 
 function logSavedMeal(id){
   const d=getData();
@@ -1090,6 +1176,40 @@ function addPantryItemToLog(id){
   if(!item) return;
   selectItem(item);
   document.getElementById('addModal').classList.add('open');
+}
+
+function openEditMeal(id){
+  const d=getData();
+  const all=[...ALL_NEW_MEALS,...d.customMeals];
+  const meal=all.find(m=>m.id===id);
+  if(!meal) return;
+  document.getElementById('editMealName').value=meal.name;
+  document.getElementById('editMealCat').value=meal.cat||'Breakfast';
+  document.getElementById('editMealDesc').value=meal.desc||'';
+  document.getElementById('editMealP').value=meal.p||0;
+  document.getElementById('editMealC').value=meal.c||0;
+  document.getElementById('editMealF').value=meal.f||0;
+  document.getElementById('editMealK').value=meal.k||0;
+  document.getElementById('editMealModal').classList.add('open');
+}
+
+function saveEditedMeal(){
+  const name=document.getElementById('editMealName').value.trim();
+  if(!name){alert('Enter a meal name');return;}
+  const cat=document.getElementById('editMealCat').value;
+  const desc=document.getElementById('editMealDesc').value.trim();
+  const p=parseFloat(document.getElementById('editMealP').value)||0;
+  const c=parseFloat(document.getElementById('editMealC').value)||0;
+  const f=parseFloat(document.getElementById('editMealF').value)||0;
+  const k=parseFloat(document.getElementById('editMealK').value)||0;
+  const id=getNextMealId(cat);
+  const d=getData();
+  d.customMeals.push({id,name,cat,desc,p,c,f,k});
+  saveData(d);
+  saveCloudPantry();
+  closeModal('editMealModal');
+  renderSavedMeals();
+  alert('Saved as '+id+': "'+name+'"');
 }
 
 function openAddPantryModal(){ document.getElementById('addPantryModal').classList.add('open'); }
